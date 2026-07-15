@@ -684,6 +684,24 @@ class TestDocType(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, doctype.insert)
 
+	def test_link_filters_already_deserialized(self):
+		# `link_filters` is a JSON fieldtype: Postgres hands it back already
+		# deserialized (psycopg2 adapts json/jsonb), MariaDB hands back a string.
+		# The parsed form must validate rather than being rejected as invalid JSON.
+		doctype = new_doctype(
+			fields=[
+				{
+					"label": "User",
+					"fieldname": "user",
+					"fieldtype": "Link",
+					"options": "User",
+					"link_filters": [["User", "name", "=", "Administrator"]],
+				}
+			]
+		)
+
+		validate_fields(doctype)
+
 	def test_missing_link_filters_field_is_allowed(self):
 		doctype = new_doctype()
 		doctype.fields[0].__dict__.pop("link_filters", None)
