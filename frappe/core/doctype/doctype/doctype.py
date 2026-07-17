@@ -1796,8 +1796,13 @@ def validate_fields(meta: Meta):
 		if not link_filters_value:
 			return
 
+		# `link_filters` is a JSON fieldtype, so its value reaches us already
+		# deserialized on Postgres (psycopg2 adapts json/jsonb columns to Python
+		# objects) but as a string on MariaDB. parse_json() parses only when the
+		# value is a string and returns it unchanged otherwise, so the field
+		# validates identically on either backend.
 		try:
-			link_filters = json.loads(link_filters_value)
+			link_filters = frappe.parse_json(link_filters_value)
 		except (TypeError, ValueError):
 			frappe.throw(
 				_("Invalid Link Filters for field {0}. Link Filters must be valid JSON.").format(
