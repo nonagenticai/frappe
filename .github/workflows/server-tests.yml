@@ -101,11 +101,33 @@ jobs:
           TOTAL_BUILDS: 2
           FRAPPE_SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
 
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v7
+      # >>> nonagenticai fork change (diverges from upstream frappe/frappe) >>>
+      # This estate does not use GitHub Actions artifact storage. Each matrix
+      # shard now uploads its own coverage report straight to Codecov, which
+      # merges reports per-commit across uploads sharing a flag. This replaces
+      # the artifact upload -> "Coverage Wrap Up" artifact-download fan-in;
+      # that job has been removed.
+      #   flags: server           -- required by codecov.yml, whose project and
+      #                              patch statuses are scoped to that flag.
+      #   working-directory       -- the bench root has no .git; the git root
+      #                              Codecov needs for path fixing is apps/frappe.
+      #   directory               -- reproduces the old ./sites/*coverage*.xml glob.
+      #   continue-on-error       -- preserves the previous blast radius: the
+      #                              removed wrap-up job was deliberately NOT in
+      #                              "Server Success" (needs: [test, migrate]),
+      #                              so a Codecov failure must not redden it.
+      - name: Upload coverage data to Codecov
+        uses: codecov/codecov-action@v7
+        continue-on-error: true
         with:
-          name: coverage-${{ matrix.db }}-${{ matrix.index }}
-          path: ./sites/*coverage*.xml
+          name: Server ${{ matrix.db }}-${{ matrix.index }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+          flags: server
+          working-directory: apps/frappe
+          directory: ${{ github.workspace }}/sites
+      # <<< nonagenticai fork change <<<
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
@@ -224,25 +246,6 @@ jobs:
             echo "Printing log: $f";
             cat $f
           done
-
-  coverage:
-    name: Coverage Wrap Up
-    needs: [test, checkrun]
-    if: ${{ needs.checkrun.outputs.build == 'strawberry' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone
-        uses: actions/checkout@v7
-      - name: Download artifacts
-        uses: actions/download-artifact@v8.0.1
-      - name: Upload coverage data
-        uses: codecov/codecov-action@v7
-        with:
-          name: Server
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
-          verbose: true
-          flags: server
 
   # TIP: Require this single check in branch protection, e.g. Server / Success
   success:
