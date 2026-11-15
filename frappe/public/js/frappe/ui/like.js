@@ -130,8 +130,8 @@ frappe.ui.setup_like_popover = ($parent, selector) => {
 
 		liked_by.forEach((user) => {
 			liked_by_list.append(`
-				<li data-user=${user}>${frappe.avatar(user, "avatar-xs")}
-					<span>${frappe.user.full_name(user)}</span>
+				<li data-user="${frappe.utils.escape_html(user)}">${frappe.avatar(user, "avatar-xs")}
+					<span>${frappe.utils.escape_html(frappe.user.full_name(user))}</span>
 				</li>
 			`);
 		});

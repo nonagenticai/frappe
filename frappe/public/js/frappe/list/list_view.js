@@ -2790,7 +2790,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		for (let name of names) {
 			this.checked_docnames.delete(name);
 			this.$result
-				.find(`.list-row-checkbox[data-name='${name.replace(/'/g, "\\'")}']`)
+				.find(`.list-row-checkbox[data-name='${CSS.escape(name)}']`)
 				.closest(".list-row-container")
 				.remove();
 		}
@@ -3519,7 +3519,11 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 								// Handle null or undefined values
 								if (value == null) return "";
 								// Convert to string and remove HTML tags if any
-								return String(value).replace(/<[^>]*>/g, "");
+								let text = String(value);
+								do {
+									text = text.replace(/<[^>]*>/g, "");
+								} while (/<[^>]*>/.test(text));
+								return text;
 							})
 							.join("\t");
 					});

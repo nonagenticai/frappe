@@ -8,10 +8,6 @@ frappe.template.compile = function (str, name) {
 	var key = name || str;
 
 	if (!frappe.template.compiled[key]) {
-		if (str.indexOf("'") !== -1) {
-			str.replace(/'/g, "\\'");
-			//console.warn("Warning: Single quotes (') may not work in templates");
-		}
 
 		// replace jinja style tags
 		str = str.replace(/{{/g, "{%=").replace(/}}/g, "%}");

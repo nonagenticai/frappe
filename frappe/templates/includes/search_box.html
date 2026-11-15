@@ -12,7 +12,7 @@
 		var thread = null;
 		function find_result(t) {
 			var search_link = "{{ search_link or '' }}" || location.pathname;
-			window.location.href = search_link + "?search=" + t;
+			window.location.href = search_link + "?search=" + encodeURIComponent(t);
 		}
 
 		$(".item-search-input").keyup(function (e) {
