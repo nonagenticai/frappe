@@ -5,16 +5,12 @@ import os
 no_cache = 1
 
 import json
-import re
 from urllib.parse import urlencode
 
 import frappe
 import frappe.sessions
 from frappe import _
 from frappe.utils.jinja_globals import is_rtl
-
-SCRIPT_TAG_PATTERN = re.compile(r"\<script[^<]*\</script\>")
-CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 
 def get_session_boot_failed_error(e: Exception) -> "frappe.SessionBootFailed":

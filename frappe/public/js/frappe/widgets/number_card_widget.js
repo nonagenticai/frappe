@@ -408,7 +408,7 @@ export default class NumberCardWidget extends Widget {
 		const style_attr = this.card_doc.color ? `style="color: ${this.card_doc.color};"` : "";
 
 		$(this.body).html(`<div class="widget-content">
-			<div class="number" ${style_attr}>${this.formatted_number}</div>
+			<div class="number" ${style_attr}>${frappe.utils.escape_html(this.formatted_number)}</div>
 			</div>`);
 	}
 

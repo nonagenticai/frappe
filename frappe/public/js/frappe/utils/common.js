@@ -71,7 +71,7 @@ frappe.get_avatar = function (css_class, title, image_url = null, remove_color, 
 		el.innerHTML = `<span class="avatar ${css_class}" ${data_attributes}>
 			<div class="avatar-frame standard-image"
 				style="${style}">
-					${abbr}
+					${frappe.utils.escape_html(abbr)}
 			</div>
 		</span>`;
 	}
@@ -204,7 +204,13 @@ window.replace_all = function (s, t1, t2) {
 };
 
 window.strip_html = function (txt) {
-	return cstr(txt).replace(/<[^>]*>/g, "");
+	let stripped = cstr(txt);
+	let previous;
+	do {
+		previous = stripped;
+		stripped = stripped.replace(/<[^>]*>/g, "");
+	} while (stripped !== previous);
+	return stripped;
 };
 
 window.strip = function (s, chars) {
@@ -260,7 +266,7 @@ frappe.get_cookies = function getCookies() {
 		});
 	} else {
 		c.match(
-			/(?:^|\s+)([!#$%&'*+\-.0-9A-Z^`a-z|~]+)=([!#$%&'*+\-.0-9A-Z^`a-z|~]*|"(?:[\x20-\x7E\x80\xFF]|\\[\x00-\x7F])*")(?=\s*[,;]|$)/g
+			/(?:^|\s+)([!#$%&'*+\-.0-9A-Z^`a-z|~]+)=([!#$%&'*+\-.0-9A-Z^`a-z|~]*|"(?:[\x20-\x5B\x5D-\x7E\x80\xFF]|\\[\x00-\x7F])*")(?=\s*[,;]|$)/g
 		).map(function ($0, $1) {
 			var name = $0,
 				value = $1.charAt(0) === '"' ? $1.substr(1, -1).replace(/\\(.)/g, "$1") : $1;
@@ -301,14 +307,18 @@ frappe.utils.xss_sanitise = function (string, options) {
 		"'": "&#x27;",
 		"/": "&#x2F;",
 	};
-	const REGEX_SCRIPT = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi; // used in jQuery 1.7.2 src/ajax.js Line 14
+	const REGEX_SCRIPT = /<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi; // used in jQuery 1.7.2 src/ajax.js Line 14
 	const REGEX_ALERT = /confirm\(.*\)|alert\(.*\)|prompt\(.*\)/gi; // captures alert, confirm, prompt
 	options = Object.assign({}, DEFAULT_OPTIONS, options); // don't deep copy, immutable beauty.
 
 	// Rule 3 - TODO: Check event handlers?
 	// script and alert should be checked first or else it will be escaped
 	if (options.strategies.includes("js")) {
-		sanitised = sanitised.replace(REGEX_SCRIPT, "");
+		let previous;
+		do {
+			previous = sanitised;
+			sanitised = sanitised.replace(REGEX_SCRIPT, "");
+		} while (sanitised !== previous);
 		sanitised = sanitised.replace(REGEX_ALERT, "");
 	}
 

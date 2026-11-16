@@ -26,7 +26,9 @@ def create_rq_users(set_admin_password=False, use_rq_auth=False):
 
 	acl_list, user_credentials = RedisQueue.gen_acl_list(set_admin_password=set_admin_password)
 
-	with open(acl_file_path, "w") as f:
+	fd = os.open(acl_file_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+	os.fchmod(fd, 0o600)
+	with os.fdopen(fd, "w") as f:
 		f.writelines([acl + "\n" for acl in acl_list])
 
 	sites_path = os.getcwd()

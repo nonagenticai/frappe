@@ -242,7 +242,7 @@ const submit_discussion = (e) => {
 const login_from_discussion = (e) => {
 	e.preventDefault();
 	const redirect = $(e.currentTarget).attr("data-redirect") || window.location.href;
-	window.location.href = `/login?redirect-to=${redirect}`;
+	window.location.href = `/login?redirect-to=${encodeURIComponent(redirect)}`;
 };
 
 const add_color_to_avatars = () => {

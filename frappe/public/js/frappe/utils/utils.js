@@ -524,7 +524,7 @@ Object.assign(frappe.utils, {
 				regExp = /^([0-9 +_\-,.*#()]){1,20}$/;
 				break;
 			case "name":
-				regExp = /^[\w][\w'-]*([ \w][\w'-]+)*$/;
+				regExp = /^[\w][\w'-]*(?: [\w'-]+)*$/;
 				break;
 			case "number":
 				regExp = /^-?(?:\d+|\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/;
@@ -857,7 +857,7 @@ Object.assign(frappe.utils, {
 	set_title: function (title) {
 		frappe._original_title = title;
 		if (frappe._title_prefix) {
-			title = frappe._title_prefix + " " + title.replace(/<[^>]*>/g, "");
+			title = frappe._title_prefix + " " + strip_html(title);
 		}
 		document.title = title;
 
